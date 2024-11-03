@@ -1,4 +1,5 @@
 Nama Anggota:
+
 Andi Aliyah Nur Inayah - 5025221196 <br>
 Dian Kusumawati - 5025221106 <br>
 
@@ -20,11 +21,13 @@ Kelas DES mendefinisikan fungsi untuk proses enkripsi dan dekripsi menggunakan d
 - Padding: Menambahkan padding 0 pada pesan untuk memenuhi panjang bit tertentu.
 
 <h4>Fitur Utama</h4>
+
 - Enkripsi: Menggunakan kunci utama untuk mengenkripsi pesan biner 8-bit menjadi pesan yang terenkripsi.
 - Dekripsi: Mengembalikan pesan terenkripsi ke bentuk aslinya menggunakan proses yang mirip dengan enkripsi namun dengan urutan kunci yang terbalik.
 - Kelas DES: Menyediakan antarmuka untuk memanggil metode Encryption dan Decryption dengan kunci yang sudah diatur dalam kelas ini.
 
 <h3>Struktur Kelas dan Fungsi Utama</h3>
+
 - Konstruktor (`__init__`): Menginisialisasi kunci utama dan mendefinisikan tabel S-Box.
 - fFunction: Menggabungkan beberapa operasi untuk memproses setiap bagian pesan dalam enkripsi.
 - kValueGenerator: Membuat dua subkunci (k1 dan k2) untuk digunakan dalam dua putaran enkripsi dan dekripsi.
@@ -33,15 +36,19 @@ Kelas DES mendefinisikan fungsi untuk proses enkripsi dan dekripsi menggunakan d
 
 <h3>Cara Penggunaan</h3>
 Jalankan pada terminal
+
 ```
 python3 server
 ```
+
 dan
+
 ```
 python3 client
 ```
 
 <h3>Struktur Proses</h3>
+
 - Permutasi Awal: Memulai dengan mengatur ulang bit dalam pesan.
 - Putaran Pertama: Menggunakan fFunction dengan k1 dan melakukan XOR.
 - Putaran Kedua: Menggunakan fFunction dengan k2 dan melakukan XOR.
