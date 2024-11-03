@@ -15,6 +15,42 @@ class DES:
             [3, 1, 0, 2],
             [2, 3, 1, 0]
         ]
+        self.s2 = [
+            [2, 1, 0, 3],
+            [3, 0, 1, 2],
+            [1, 3, 2, 0],
+            [0, 2, 3, 1]
+        ]
+        self.s3 = [
+            [3, 0, 1, 2],
+            [2, 1, 3, 0],
+            [0, 3, 2, 1],
+            [1, 2, 0, 3]
+        ]
+        self.s4 = [
+            [0, 3, 2, 1],
+            [1, 2, 0, 3],
+            [3, 1, 0, 2],
+            [2, 0, 3, 1]
+        ]
+        self.s5 = [
+            [1, 2, 3, 0],
+            [0, 3, 1, 2],
+            [2, 0, 1, 3],
+            [3, 1, 2, 0]
+        ]
+        self.s6 = [
+            [3, 1, 2, 0],
+            [0, 2, 3, 1],
+            [1, 0, 3, 2],
+            [2, 3, 0, 1]
+        ]
+        self.s7 = [
+            [2, 3, 0, 1],
+            [1, 0, 2, 3],
+            [3, 2, 1, 0],
+            [0, 1, 3, 2]
+        ]
 
     def getSboxEntry(self, binary, sbox):
         row = binary[0] + binary[3]
@@ -23,10 +59,23 @@ class DES:
         col = int(col, 2)
         if sbox == 0:
             binary = bin(self.s0[row][col])[2:]
-            return binary.zfill(2)
-        else:
+        elif sbox == 1:
             binary = bin(self.s1[row][col])[2:]
-            return binary.zfill(2)
+        elif sbox == 2:
+            binary = bin(self.s2[row][col])[2:]
+        elif sbox == 3:
+            binary = bin(self.s3[row][col])[2:]
+        elif sbox == 4:
+            binary = bin(self.s4[row][col])[2:]
+        elif sbox == 5:
+            binary = bin(self.s5[row][col])[2:]
+        elif sbox == 6:
+            binary = bin(self.s6[row][col])[2:]
+        elif sbox == 7:
+            binary = bin(self.s7[row][col])[2:]
+        else:
+            raise ValueError("Invalid S-box number")
+        return binary.zfill(2)
 
     def fFunction(self, right, key):
         expansion = right[3] + right[0] + right[1] + right[2] + right[1] + right[2] + right[3] + right[0]
