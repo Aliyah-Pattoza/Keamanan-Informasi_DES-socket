@@ -1,7 +1,6 @@
 import socket
 import library
 
-# Server setup
 def Main():
     host = "127.0.0.1"
     port = 5001
@@ -29,6 +28,20 @@ def Main():
         print("Decrypted Message:", decryptedMessage)
         print("\n")
         
+        # Mengambil input pesan dari server untuk dikirim ke client
+        message = input("Enter the message you want to send (or 'q' to quit): ")
+        if message.lower() == 'q':
+            conn.send(message.encode())
+            break
+
+        # Enkripsi pesan sebelum dikirim
+        encryptedMessage = library.encrypt(message)
+        print("Encrypted message to be sent:", encryptedMessage)
+        
+        # Kirim pesan terenkripsi ke client
+        library.sending()
+        conn.send(encryptedMessage.encode())
+    
     conn.close()
     print("Server stopped.")
 

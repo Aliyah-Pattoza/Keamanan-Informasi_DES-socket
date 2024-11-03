@@ -1,129 +1,87 @@
 import sys
 
 class DES:
-	def __init__(self):
+    def __init__(self):
+        self.key = "1010101010"  
+        self.s0 = [
+            [1, 0, 3, 2],
+            [3, 2, 1, 0],
+            [0, 1, 2, 3],
+            [2, 3, 0, 1]
+        ]
+        self.s1 = [
+            [0, 2, 1, 3],
+            [1, 0, 3, 2],
+            [3, 1, 0, 2],
+            [2, 3, 1, 0]
+        ]
 
-		self.key = "1010101010"  
-  
-		self.s0 = [[2, 3, 1, 0],   
-				[1, 0, 3, 2],
-				[0, 1, 2, 3],
-				[3, 2, 0, 1]]
+    def getSboxEntry(self, binary, sbox):
+        row = binary[0] + binary[3]
+        col = binary[1] + binary[2]
+        row = int(row, 2)
+        col = int(col, 2)
+        if sbox == 0:
+            binary = bin(self.s0[row][col])[2:]
+            return binary.zfill(2)
+        else:
+            binary = bin(self.s1[row][col])[2:]
+            return binary.zfill(2)
 
-		self.s1 = [[3, 2, 1, 0],   
-				[1, 3, 0, 2],
-				[0, 1, 3, 2],
-				[2, 0, 3, 1]]
+    def fFunction(self, right, key):
+        expansion = right[3] + right[0] + right[1] + right[2] + right[1] + right[2] + right[3] + right[0]
+        XOR = bin(int(expansion, 2) ^ int(key, 2))[2:].zfill(8)
+        left = XOR[:4]
+        right = XOR[4:]
+        S0 = self.getSboxEntry(left, 0)
+        S1 = self.getSboxEntry(right, 1)
+        p4 = S0 + S1
+        return p4[1] + p4[3] + p4[2] + p4[0]
 
-	def getSboxEntry(self, binary,sbox):
+    def kValueGenerator(self, key):
+        # Generate 16 keys for 16 rounds
+        keys = []
+        newKey = key[2] + key[4] + key[1] + key[6] + key[3] + key[9] + key[0] + key[8] + key[7] + key[5]
+        left, right = newKey[:5], newKey[5:]
+        for _ in range(16):
+            left = left[1:] + left[0]
+            right = right[1:] + right[0]
+            combined = left + right
+            permuted = combined[5] + combined[2] + combined[6] + combined[3] + combined[7] + combined[4] + combined[9] + combined[8]
+            keys.append(permuted)
+        return keys
 
-		row = binary[0] + binary[3]
-		col = binary[1] + binary[2]
+    def initialPermutation(self, key):
+        return key[1] + key[5] + key[2] + key[0] + key[3] + key[7] + key[4] + key[6]
 
-		row = int(row,2)
-		col = int(col,2)
-		if sbox == 0:
-			binary = bin(self.s0[row][col])[2:]
-			
-			if len(binary) == 1:
-				binary = "0" + binary
-			return binary
-		else:
-			binary = bin(self.s1[row][col])[2:]
-			
-			if len(binary) == 1:
-				binary = "0" + binary
-			return binary
+    def reversePermutation(self, key):
+        return key[3] + key[0] + key[2] + key[4] + key[6] + key[1] + key[7] + key[5]
 
-	def fFunction(self,key, k):
-		expansion = key[3]+key[0]+key[1]+key[2]+key[1]+key[2]+key[3]+key[0]
+    def padding(self, string, length):
+        return string.zfill(length)
 
-		XOR = bin((int(expansion,2)^int(k,2)))[2:]
-		XOR = self.padding(XOR,8)
+    def Encryption(self, string):
+        permString = self.initialPermutation(string)
+        left, right = permString[:4], permString[4:]
+        keys = self.kValueGenerator(self.key)
 
-		left = XOR[:4]
-		right = XOR[4:]
+        for i in range(16):
+            fOutput = self.fFunction(right, keys[i])
+            XOR_result = bin(int(left, 2) ^ int(fOutput, 2))[2:].zfill(4)
+            left, right = right, XOR_result  # Swap left and right
 
-		S0 = self.getSboxEntry(left, 0)
-		S1 = self.getSboxEntry(right, 1)
+        output = right + left  # Combine after final swap
+        return self.reversePermutation(output)
 
-		p4 = S0 + S1
+    def Decryption(self, string):
+        permString = self.initialPermutation(string)
+        left, right = permString[:4], permString[4:]
+        keys = self.kValueGenerator(self.key)
 
-		p4 = p4[1]+p4[3]+p4[2]+p4[0]
+        for i in range(16):
+            fOutput = self.fFunction(right, keys[15 - i])  # Use keys in reverse for decryption
+            XOR_result = bin(int(left, 2) ^ int(fOutput, 2))[2:].zfill(4)
+            left, right = right, XOR_result  # Swap left and right
 
-		return p4
-
-	def kValueGenerator(self, key):
-		newKey = key[2] + key[4] + key[1] + key[6] + key[3] + key[9] + key[0] + key[8] + key[7] + key[5]
-		
-		left = newKey[0:5]
-		right = newKey[5:]
-		
-		leftShift = left[1:] + left[0]
-		rightShift = right[1:] + right[0]
-
-		k1 = leftShift + rightShift
-		k1Permuted = k1[5] + k1[2] + k1[6] + k1[3] + k1[7] + k1[4] + k1[9] + k1[8]
-
-		leftShiftTwice = leftShift[1:] + leftShift[0]
-		rightShiftTwice = rightShift[1:] + rightShift[0]
-
-		k2 = leftShiftTwice + rightShiftTwice
-		k2Permuted = k2[5] + k2[2] + k2[6] + k2[3] + k2[7] + k2[4] + k2[9] + k2[8]
-
-		return(k1Permuted,k2Permuted)
-
-	def initialPermutation(self,key):
-		newKey = key[1] + key[5] + key[2] + key[0] + key[3] + key[7] + key[4] + key[6]
-		return newKey
-
-	def reversePermutation(self,key):
-		newKey = key[3] + key[0] + key[2] + key[4] + key[6] + key[1] + key[7] + key[5]
-		return newKey
-
-	def padding(self,string,length):
-		if len(string) == length:
-			return string
-		while(len(string) < length):
-			string = "0" + string
-		return string
-
-	def Encryption(self,string):
-		permString = self.initialPermutation(string)
-		
-		left = permString[0:4]
-		right = permString[4:]
-		k1,k2 = self.kValueGenerator(self.key)
-
-		firstFOutput = self.fFunction(right,k1)
-
-		firstXOR = bin((int(left,2)^int(firstFOutput,2)))[2:]
-		firstXOR = self.padding(firstXOR, 4)
-		secondFOutput = self.fFunction(firstXOR,k2)
-
-		secondXOR = bin((int(right,2)^int(secondFOutput,2)))[2:]
-		secondXOR = self.padding(secondXOR, 4)
-		output = secondXOR + firstXOR
-		
-		output = self.reversePermutation(output)
-		return output
-
-	def Decryption(self,string):
-		permString = self.initialPermutation(string)
-		
-		left = permString[0:4]
-		right = permString[4:]
-		k1,k2 = self.kValueGenerator(self.key)
-
-		firstFOutput = self.fFunction(right,k2)
-
-		firstXOR = bin((int(left,2)^int(firstFOutput,2)))[2:]
-		firstXOR = self.padding(firstXOR, 4)
-		secondFOutput = self.fFunction(firstXOR,k1)
-
-		secondXOR = bin((int(right,2)^int(secondFOutput,2)))[2:]
-		secondXOR = self.padding(secondXOR, 4)
-		output = secondXOR + firstXOR
-
-		output = self.reversePermutation(output)
-		return output
+        output = right + left  # Combine after final swap
+        return self.reversePermutation(output)
